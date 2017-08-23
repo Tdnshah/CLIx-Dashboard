@@ -1,3 +1,10 @@
+var states = ["Chhattisgarh","Mizoram","Rajasthan","Telangana"]
+var statesTotalSchools = [30,30,101,30]
+
+var district =["Dhamtari","Bilaspur","Aizawl","Baran","Jaipur","Jhalawar","Sirohi","Peddapally","Jagityal","Jangaon","Jayashankar","Karimnagar(new)","Mahabubabad","Medchal","Ranga Reddy(new)","Siddipet","Siricilla-Rajanna","Vikarabad","Warangal(R)","Warangal(U)"]
+
+var final_state_level_data = [];
+
 
 d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results-3.csv",function(d){
     //here the first "d" contains an array, this array contains objects of rows of the csv file
@@ -13,5 +20,29 @@ d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results-3.csv",function(d){
                     .key(function(d){return d.CLIx_code;})                
                     .key(function(d){return d.survey_time;})
                     .entries(d);
-
+    nestedData.forEach(function(state_level){  
+        var data = {};
+        var state_level_implemented_school=0;
+        var state_level_not_implemented_school=0;
+        var state_level_no_data_available_school=0;
+        var district_name;
+        state_level.values.forEach(function(district_level){
+            state_level_no_data_available_school = state_level_no_data_available_school + district_level.values.length
+            district_name = district[district_level.key-1];
+            district_level.values.forEach(function(implemented_school_count){
+                implemented_school_count.values.forEach(function(implemented_school_count_final){
+                    console.log(implemented_school_count_final.values[])
+                })
+            })
+        })
+        
+        Stdata = {state : states[state_level.key-1], noOfImplementedSchools:10, noOfNotImplementedSchools: 2,noDataAvailabeSchools : statesTotalSchools[state_level.key-1]-state_level_no_data_available_school}
+//        console.log(Stdata);
+//        console.log(state_level);
+        
+    })
+                
 })
+
+
+     
