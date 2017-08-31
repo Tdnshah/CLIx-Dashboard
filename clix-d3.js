@@ -61,7 +61,7 @@ d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(d){
         var state_level_not_implemented_school=0;
         var state_level_no_data_available_school=0;
         var district_name;
-//        console.log(state_level);
+        console.log(state_level);
         
 //  District Level Nesting happens here 
         state_level.values.forEach(function(district_level){
