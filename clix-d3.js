@@ -19,6 +19,8 @@ var x = d3.scaleBand()
     .padding(0.1)
     .align(0.1);
 
+var color;
+
 var y = d3.scaleLinear()
     .rangeRound([height, 0]);
 
@@ -31,16 +33,21 @@ var stack = d3.stack()
 // visulization code before importing csv ended
 
 // data manupulation global 
-var states = ["Chhattisgarh","Mizoram","Rajasthan","Telangana"]
-var statesTotalSchools = [30,30,101,30]
-var columns1 = ["state","noDataAvailabeSchools","noOfImplementedSchools","noOfNotImplementedSchools"]
 
+var states = ["Chhattisgarh","Mizoram","Rajasthan","Telangana"]
+var statesTotalSchools = [30,30,101,300]
+
+//This Array is getting mapped with the colors that appear on the graph hence if we need to change the seqence of the data that is getting visualised then the position of names in this array is to be changed. 
+
+var columns1 = ["state","noOfImplementedSchools","noOfNotImplementedSchools","noDataAvailabeSchools"]
+ 
 var district =["Dhamtari","Bilaspur","Aizawl","Baran","Jaipur","Jhalawar","Sirohi","Peddapally","Jagityal","Jangaon","Jayashankar","Karimnagar(new)","Mahabubabad","Medchal","Ranga Reddy(new)","Siddipet","Siricilla-Rajanna","Vikarabad","Warangal(R)","Warangal(U)"]
 
 var final_state_level_data = [];
 // data manupulation global ended
 
-d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(d){
+d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results05-09.csv",function(error , d){
+    if (error) throw error;
     //here the first "d" contains an array, this array contains objects of rows of the csv file
     
     // hence we will nest this objects in the following fashion for us to get the data in proper heirarchy.
@@ -55,116 +62,98 @@ d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(d){
                     .key(function(d){return d.survey_time;})
                     .entries(d);
 //  State Level Nesting happens here 
+//    console.log(nestedData)
     nestedData.forEach(function(state_level){
         var data = {};
         var state_level_implemented_school=0;
         var state_level_not_implemented_school=0;
         var state_level_no_data_available_school=0;
         var district_name;
-        console.log(state_level);
         
 //  District Level Nesting happens here 
         state_level.values.forEach(function(district_level){
             
             state_level_no_data_available_school = state_level_no_data_available_school + district_level.values.length
-            
-//            console.log(district_level);
-            
             district_name = district[district_level.key-1];
-            
-                district_level.values.forEach(function(implemented_school_count){
-                
+                district_level.values.forEach(function(implemented_school_count){                
 //                    console.log(implemented_school_count.values[implemented_school_count.values.length - 1]);
-                    
                     if(implemented_school_count.values[implemented_school_count.values.length - 1].values[0]["CLIxModule_Impl"]== 1 ){
-                        
                         state_level_implemented_school ++ ;
-                        
                         }
                     else if (implemented_school_count.values[implemented_school_count.values.length - 1].values[0]["CLIxModule_Impl"]== 2){
                         state_level_not_implemented_school ++;
                         }
 //                    implemented_school_count.values.forEach(function(implemented_school_count_final){
 //                    
-////                        console.log(implemented_school_count_final.values)
-//                
-//                    });
+////                        console.log(implemented_school_count_final.values)                
                 });
         });
 //      final object that is to be sent to d3 visulisation code         
-        Stdata = {state : states[state_level.key-1], noOfImplementedSchools:state_level_implemented_school, noOfNotImplementedSchools: state_level_not_implemented_school,noDataAvailabeSchools : statesTotalSchools[state_level.key-1]-state_level_no_data_available_school}
+        Stdata = {state : states[state_level.key-1],noOfNotImplementedSchools: state_level_not_implemented_school ,noOfImplementedSchools:state_level_implemented_school,noDataAvailabeSchools : statesTotalSchools[state_level.key-1]-state_level_no_data_available_school,}
         final_state_level_data.push(Stdata);
     })
         final_state_level_data.push({columns : columns1});
           
-console.log(final_state_level_data[final_state_level_data.length-1]);  
-  
-    
+//console.log(final_state_level_data);  
+      
+//                    });
     final_state_level_data.sort(function(a, b) { return b[final_state_level_data[final_state_level_data.length-1].columns[1]] / b.total - a[final_state_level_data[final_state_level_data.length-1].columns[1]] / a.total; });
-
-  x.domain(final_state_level_data.map(function(d) { return d.state; }));
-  z.domain(final_state_level_data[final_state_level_data.length-1].columns.slice(1));
-
-  var serie = g.selectAll(".serie")
+x.domain(final_state_level_data.map(function(d) { return d.state; }));
+z.domain(final_state_level_data[final_state_level_data.length-1].columns.slice(1));
+    
+var serie = g.selectAll(".serie")
     .data(stack.keys(final_state_level_data[final_state_level_data.length-1].columns.slice(1))(final_state_level_data))
     .enter().append("g")
     .attr("class", "serie")
     .attr("fill", function(d) {return z(d.key);});
     
-serie.selectAll("rect")
-    .data(function(d) { return d; })
+    
+serie.selectAll("g")
+    .data(function(d1) {return d1;})
     .enter().append("rect")
-    .attr("x", function(d) {return x(d.data.state);})
-    .attr("y", function(d) {return y(d[1]); })
-    .attr("height", function(d) { console.log(x.bandwidth()) ;return y(d[0]) - y(d[1]); })
+    .attr("x", function(d1) {return x(d1.data.state);})
+    .attr("y", function(d1) {return y(d1[1]); })
+    .attr("height", function(d1) {return y(d1[0]) - y(d1[1]); })
     .attr("width", x.bandwidth())
-    .on("mouseover", function(d){
-				var xPos = parseFloat(d3.select(this).attr("x"));
-				var yPos = parseFloat(d3.select(this).attr("y"));
-				var height = parseFloat(d3.select(this).attr("height"));
-				
-				d3.select(this).attr("stroke","yellow").attr("stroke-width",5);						
-            serie.append("rect")
+    .on("mouseover", function(d1){
+            var xPos = parseFloat(d3.select(this).attr("x"));
+            var yPos = parseFloat(d3.select(this).attr("y"));
+            var height = parseFloat(d3.select(this).attr("height"));
+            d3.select(this).attr("stroke","yellow").attr("stroke-width",5);	
+            g.append("rect")
                 .attr("width",140)
                 .attr("height",40)
                 .attr("fill","#5089c8")
                 .attr("opacity","0.8")
                 .attr("x",xPos+90)
-				.attr("y",y(d[1]))
+				.attr("y",y(d1[1]))
 				.attr("class","tool-tip-rect")
-	        serie.append("text")
+	       g.append("text")
 				.attr("x",xPos+95)
-				.attr("y",y(d[1])+20)
+				.attr("y",y(d1[1])+20)
 				.attr("class","tooltip-dash")
 				.attr("fill","white")
 				.attr("opacity",1)
 				.attr("text-anchor","right")
 				.text(function(){
-				     if(d[0]===0){
-				    return "No of schools:- " + d.data.Implemented;
-				    }else if (d[1] !== 1){
-				    return "No.of schools:-" + d.data["Un-implemented"];
-				    }
-				    else{
-				       return "No.of schools :-" + d.data["No Data Available"]
-				    }
+                console.log(color)    
 				})
 				 
-		})
-		
+		})		
 		.on("mouseout",function(){
-			serie.select(".tooltip-dash").remove();
-			serie.select(".tool-tip-rect").remove();
+			g.select(".tooltip-dash").remove();
+			g.select(".tool-tip-rect").remove();
 			d3.select(this).attr("stroke","pink").attr("stroke-width",0);
-														
+								
 		})
 		.on("click",function(d){
-		    console.log("doing");
-		     if(d[0]===0){
-				location.href = "http://clix.tiss.edu/dev/ver1.0/mizoram-school-data/"
-			}else{
-			console.log("Take me nowhere")
-			}
+            updateDistrictData(d);
+//		    console.log(d.data.state);
+//		     if(d[0]===0){
+//				location.href = "http://clix.tiss.edu/dev/ver1.0/mizoram-school-data/"
+//			}else{
+//			console.log("Take me nowhere")
+//			}
 		    
 		});
 // serie.selectAll('text')
@@ -207,7 +196,18 @@ serie.selectAll("rect")
       .attr("dy", ".35em")
       .attr("text-anchor", "start")
       .text(function(d) { return d; });
-    
-    
-    
+
 })
+
+function updateDistrictData(d){
+    d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(districtData){
+    districtDataNested = d3.nest()
+                    .key(function(districtData){return districtData.state_entry;})
+                    .key(function(districtData){return districtData.district_entry;})
+                    .key(function(districtData){return districtData.CLIx_code;})                
+                    .key(function(districtData){return districtData.survey_time;})
+                    .entries(districtData);
+    console.log(states.indexOf(d.data.state))
+    console.log(districtDataNested[states.indexOf(d.data.state)-1])
+    })
+}
