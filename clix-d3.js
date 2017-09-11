@@ -101,16 +101,18 @@ d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results05-09.csv",function(error , d){
 x.domain(final_state_level_data.map(function(d) { return d.state; }));
 z.domain(final_state_level_data[final_state_level_data.length-1].columns.slice(1));
     
-var serie = g.selectAll(".serie")
+var serie1 = g.selectAll("g")
     .data(stack.keys(final_state_level_data[final_state_level_data.length-1].columns.slice(1))(final_state_level_data))
-    .enter().append("g")
+    .enter()
+    .append("g")
     .attr("class", "serie")
     .attr("fill", function(d) {return z(d.key);});
     
     
-serie.selectAll("g")
+serie1.selectAll("g")
     .data(function(d1) {return d1;})
     .enter().append("rect")
+    
     .attr("x", function(d1) {return x(d1.data.state);})
     .attr("y", function(d1) {return y(d1[1]); })
     .attr("height", function(d1) {return y(d1[0]) - y(d1[1]); })
@@ -119,7 +121,8 @@ serie.selectAll("g")
             var xPos = parseFloat(d3.select(this).attr("x"));
             var yPos = parseFloat(d3.select(this).attr("y"));
             var height = parseFloat(d3.select(this).attr("height"));
-            d3.select(this).attr("stroke","yellow").attr("stroke-width",5);	
+            d3.select(this).attr("stroke","yellow").attr("stroke-width",5);	            
+            color = d3.select(this.parentNode).attr("fill")
             g.append("rect")
                 .attr("width",140)
                 .attr("height",40)
@@ -136,8 +139,16 @@ serie.selectAll("g")
 				.attr("opacity",1)
 				.attr("text-anchor","right")
 				.text(function(){
-                console.log(color)    
-				})
+               if(color == "#7b6888"){
+                   return d1.data.noDataAvailabeSchools    
+               }
+               else if(color == "#000080"){
+                   return d1.data.noOfNotImplementedSchools
+               }
+               else if(color == "#A42491"){
+                   return d1.data.noOfImplementedSchools
+               }
+           })
 				 
 		})		
 		.on("mouseout",function(){
