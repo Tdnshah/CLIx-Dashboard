@@ -101,15 +101,14 @@ d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results05-09.csv",function(error , d){
 x.domain(final_state_level_data.map(function(d) { return d.state; }));
 z.domain(final_state_level_data[final_state_level_data.length-1].columns.slice(1));
     
-var serie1 = g.selectAll("g")
+var serie = g.selectAll("g")
     .data(stack.keys(final_state_level_data[final_state_level_data.length-1].columns.slice(1))(final_state_level_data))
     .enter()
     .append("g")
     .attr("class", "serie")
     .attr("fill", function(d) {return z(d.key);});
     
-    
-serie1.selectAll("g")
+serie.selectAll("g")
     .data(function(d1) {return d1;})
     .enter().append("rect")
     
@@ -123,6 +122,7 @@ serie1.selectAll("g")
             var height = parseFloat(d3.select(this).attr("height"));
             d3.select(this).attr("stroke","yellow").attr("stroke-width",5);	            
             color = d3.select(this.parentNode).attr("fill")
+            updateDistrictData(d1);
             g.append("rect")
                 .attr("width",140)
                 .attr("height",40)
@@ -159,7 +159,7 @@ serie1.selectAll("g")
 		})
 		.on("click",function(d){
             updateDistrictData(d);
-//		    console.log(d.data.state);
+		    console.log(d.data.state);
 //		     if(d[0]===0){
 //				location.href = "http://clix.tiss.edu/dev/ver1.0/mizoram-school-data/"
 //			}else{
@@ -188,7 +188,7 @@ serie1.selectAll("g")
     .attr("class", "axis axis--y")
     .call(d3.axisLeft(y).ticks(10, "%"));
 
- var legend = g.selectAll(".legend")
+var legend = g.selectAll(".legend")
     .data(final_state_level_data[final_state_level_data.length-1].columns.slice(1).reverse())
     .enter().append("g")
       .attr("class", "legend")
@@ -206,19 +206,30 @@ serie1.selectAll("g")
       .attr("y", 9)
       .attr("dy", ".35em")
       .attr("text-anchor", "start")
-      .text(function(d) { return d; });
-
-})
+      .text(function(d) { return d; }) 
 
 function updateDistrictData(d){
-    d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(districtData){
-    districtDataNested = d3.nest()
-                    .key(function(districtData){return districtData.state_entry;})
-                    .key(function(districtData){return districtData.district_entry;})
-                    .key(function(districtData){return districtData.CLIx_code;})                
-                    .key(function(districtData){return districtData.survey_time;})
-                    .entries(districtData);
-    console.log(states.indexOf(d.data.state))
-    console.log(districtDataNested[states.indexOf(d.data.state)-1])
-    })
+//    console.log()
+//    var indexof = states.indexOf(d.data.state)
+//    console.log(indexof + 1)
+//    d3.csv("./IMT/DATA/NEWIMTENGLISH25May2017_results(4).csv",function(districtData){
+//    var schools = [];
+//    districtDataNested = d3.nest()
+//                    .key(function(districtData){return districtData.state_entry;})
+//                    .key(function(districtData){return districtData.district_entry;})
+//                    .key(function(districtData){return districtData.CLIx_code;})                
+//                    .key(function(districtData){return districtData.survey_time;})
+//                    .entries(districtData);
+//                
+//districtDataNested.forEach( function(x){
+//    console.log(x.key == indexof)
+//    x.values[(x.values.length-1)].values.forEach(function(x1){
+////        console.log(x1)
+////        console.log(x.values(d.data.state))
+////        schools.push(x.key)
+//    })
+        
+//        })
+//})
 }
+});
